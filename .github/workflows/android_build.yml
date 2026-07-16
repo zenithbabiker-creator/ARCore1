@@ -1,0 +1,36 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: |
+          # زيادة مساحة الذاكرة المخصصة لعملية البناء لتجنب توقف Gradle
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" > gradle.properties
+          
+          # إعطاء صلاحية التنفيذ لملف الـ gradlew
+          chmod +x gradlew
+          
+          # بناء نسخة الـ Debug وتخطي فحص الـ Lint لتقليل زمن البناء ومنع التعارضات
+          ./gradlew assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LandscapeDesignApp
+          path: app/build/outputs/apk/debug/app-debug.apk
