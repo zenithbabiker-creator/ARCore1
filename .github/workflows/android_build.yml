@@ -19,9 +19,12 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
-        # نستخدم أمر gradle مباشرة المثبت في النظام بدلاً من ./gradlew
         run: |
+          # زيادة مساحة الذاكرة
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" > gradle.properties
+          
+          # حل مشكلة الأيقونة المفقودة تلقائياً عبر استبدال النص في الـ Manifest
+          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@android:drawable/sym_def_app_icon"|g' LandscapeDesignApp/LandscapeDesignApp/app/src/main/AndroidManifest.xml
           
           # الانتقال إلى المجلد الذي يحتوي على ملف البناء
           cd LandscapeDesignApp/LandscapeDesignApp
