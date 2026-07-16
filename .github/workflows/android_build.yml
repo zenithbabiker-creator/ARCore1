@@ -20,24 +20,17 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          # 1. إنشاء ملف خصائص يفرض الذاكرة العالية جداً داخل المجلد الصحيح
-          echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=2g -XX:+UseParallelGC" > LandscapeDesignApp/LandscapeDesignApp/gradle.properties
+          # 1. إعداد الذاكرة
+          echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=2g" > gradle.properties
           
-          # 2. حل مشكلة الأيقونة تلقائياً
-          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@android:drawable/sym_def_app_icon"|g' LandscapeDesignApp/LandscapeDesignApp/app/src/main/AndroidManifest.xml
+          # 2. إصلاح الأيقونة (تأكد من المسار الصحيح)
+          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@android:drawable/sym_def_app_icon"|g' app/src/main/AndroidManifest.xml
           
-          # 3. الانتقال للمجلد
-          cd LandscapeDesignApp/LandscapeDesignApp
-          
-          # 4. إيقاف أي Daemon سابق قد يكون علق بذاكرة محدودة
-          gradle --stop
-          
-          # 5. تشغيل البناء مع فرض الذاكرة مرة أخرى كمتغير بيئة
-          export GRADLE_OPTS="-Xmx6g -XX:MaxMetaspaceSize=2g"
-          gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint -x test
+          # 3. البناء مباشرة من المجلد الرئيسي (بدون cd لعمق كبير)
+          ./gradlew clean assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint -x test
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LandscapeDesignApp
-          path: LandscapeDesignApp/LandscapeDesignApp/app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
