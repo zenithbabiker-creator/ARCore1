@@ -23,14 +23,17 @@ jobs:
           # 1. إعداد الذاكرة
           echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=2g" > gradle.properties
           
-          # 2. إصلاح الأيقونة (تأكد من المسار الصحيح)
+          # 2. الانتقال للمجلد الذي يحتوي على ملفات المشروع الحقيقية
+          cd LandscapeDesignApp/LandscapeDesignApp
+          
+          # 3. إصلاح الأيقونة في المسار الصحيح المكتشف
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@android:drawable/sym_def_app_icon"|g' app/src/main/AndroidManifest.xml
           
-          # 3. البناء مباشرة من المجلد الرئيسي (بدون cd لعمق كبير)
+          # 4. البناء من هذا المجلد
           ./gradlew clean assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint -x test
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LandscapeDesignApp
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: LandscapeDesignApp/LandscapeDesignApp/app/build/outputs/apk/debug/app-debug.apk
