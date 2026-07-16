@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # فرض استخدام الذاكرة مباشرة عبر متغيرات النظام لضمان استجابة Gradle
+      GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,17 +23,14 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          # زيادة مساحة الذاكرة
-          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" > gradle.properties
-          
-          # حل مشكلة الأيقونة المفقودة تلقائياً عبر استبدال النص في الـ Manifest
+          # حل مشكلة الأيقونة تلقائياً
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@android:drawable/sym_def_app_icon"|g' LandscapeDesignApp/LandscapeDesignApp/app/src/main/AndroidManifest.xml
           
-          # الانتقال إلى المجلد الذي يحتوي على ملف البناء
+          # الانتقال للمجلد الصحيح
           cd LandscapeDesignApp/LandscapeDesignApp
           
-          # استخدام gradle المثبت في النظام لتنفيذ البناء
-          gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
+          # تشغيل البناء مع استبعاد الـ Lint والـ Tests لتوفير الذاكرة
+          gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint -x test
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
