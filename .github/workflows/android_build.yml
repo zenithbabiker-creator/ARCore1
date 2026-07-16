@@ -19,31 +19,18 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
+        # نستخدم أمر gradle مباشرة المثبت في النظام بدلاً من ./gradlew
         run: |
-          # 1. طباعة محتويات المجلد للتأكد من وجود ملف gradlew
-          ls -R
-          
-          # 2. البحث عن مكان ملف gradlew وتحديد مساره
-          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
-          
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "Error: gradlew file not found!"
-            exit 1
-          fi
-          
-          echo "Found gradlew at: $GRADLEW_PATH"
-          
-          # 3. إعطاء صلاحية التنفيذ للملف الموجود
-          chmod +x "$GRADLEW_PATH"
-          
-          # 4. ضبط الذاكرة
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" > gradle.properties
           
-          # 5. تنفيذ البناء باستخدام المسار الذي تم العثور عليه
-          "$GRADLEW_PATH" assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
+          # الانتقال إلى المجلد الذي يحتوي على ملف البناء
+          cd LandscapeDesignApp/LandscapeDesignApp
+          
+          # استخدام gradle المثبت في النظام لتنفيذ البناء
+          gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LandscapeDesignApp
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: LandscapeDesignApp/LandscapeDesignApp/app/build/outputs/apk/debug/app-debug.apk
