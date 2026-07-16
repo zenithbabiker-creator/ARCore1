@@ -20,14 +20,27 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          # زيادة مساحة الذاكرة المخصصة لعملية البناء لتجنب توقف Gradle
+          # 1. طباعة محتويات المجلد للتأكد من وجود ملف gradlew
+          ls -R
+          
+          # 2. البحث عن مكان ملف gradlew وتحديد مساره
+          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+          
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "Error: gradlew file not found!"
+            exit 1
+          fi
+          
+          echo "Found gradlew at: $GRADLEW_PATH"
+          
+          # 3. إعطاء صلاحية التنفيذ للملف الموجود
+          chmod +x "$GRADLEW_PATH"
+          
+          # 4. ضبط الذاكرة
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" > gradle.properties
           
-          # إعطاء صلاحية التنفيذ لملف الـ gradlew
-          chmod +x gradlew
-          
-          # بناء نسخة الـ Debug وتخطي فحص الـ Lint لتقليل زمن البناء ومنع التعارضات
-          ./gradlew assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
+          # 5. تنفيذ البناء باستخدام المسار الذي تم العثور عليه
+          "$GRADLEW_PATH" assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true -x lint
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
